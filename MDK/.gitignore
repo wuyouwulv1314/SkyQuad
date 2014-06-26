@@ -1,0 +1,7 @@
+#comment
+*.uvgui.*
+*.uvopt
+*.bak
+*.dep
+JLinkLog.txt
+JLinkSettings.ini
