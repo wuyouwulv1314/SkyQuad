@@ -40,7 +40,7 @@ _Control_Loop_t Control_AngleLoop = {\
 //Throttle
 volatile int16_t Control_ThrottleLast = 0;
 //InputNormalize
-volatile float Control_ThrottleKp = 1.0;
+volatile float Control_ThrottleKp = 0.6;
 volatile float Control_ThrottleKd = 0.0;
 //PWM Output
 volatile int16_t Control_ThrottleDesired = 0;
@@ -225,30 +225,36 @@ void Control_Calc_PWM(_Control_Loop_t* loop)/*{{{*/
 	roll = -pitch;
 	pitch=temp;
 	//FL
-	realPWM[FL] = throttle + yaw + roll + pitch;
+	//realPWM[FL] = throttle + yaw + roll + pitch;
+	realPWM[FL] = throttle + yaw + roll + pitch + FLZero;
 	if(realPWM[FL] > Control_TotalOutputMax)realPWM[FL] = Control_TotalOutputMax;
-	else if(realPWM[FL] < 0)realPWM[FL] = 0;
+	//else if(realPWM[FL] < 0)realPWM[FL] = 0;
+	else if(realPWM[FL] < 0)realPWM[FL] = FLZero;
 	
 	//FR
-	realPWM[FR] = throttle - yaw - roll + pitch;
+	//realPWM[FR] = throttle - yaw - roll + pitch;
+	realPWM[FR] = throttle - yaw - roll + pitch + FRZero;
 	if(realPWM[FR] > Control_TotalOutputMax)realPWM[FR] = Control_TotalOutputMax;
-	else if(realPWM[FR] < 0)realPWM[FR] = 0;
+	//else if(realPWM[FR] < 0)realPWM[FR] = 0;
+	else if(realPWM[FR] < 0)realPWM[FR] = FRZero;
 	
 	//RL
-	realPWM[RL] = throttle - yaw + roll - pitch;
+	//realPWM[RL] = throttle - yaw + roll - pitch;
+	realPWM[RL] = throttle - yaw + roll - pitch + RLZero;
 	if(realPWM[RL] > Control_TotalOutputMax)realPWM[RL] = Control_TotalOutputMax;
-	else if(realPWM[RL] < 0)realPWM[RL] = 0;
+	//else if(realPWM[RL] < 0)realPWM[RL] = 0;
+	else if(realPWM[RL] < 0)realPWM[RL] = RLZero;
 	
 	//RR
-	realPWM[RR] = throttle + yaw - roll - pitch;
+	realPWM[RR] = throttle + yaw - roll - pitch + RRZero;
 	if(realPWM[RR] > Control_TotalOutputMax)realPWM[RR] = Control_TotalOutputMax;
-	else if(realPWM[RR] < 0)realPWM[RR] = 0;
+	else if(realPWM[RR] < 0)realPWM[RR] = RRZero;
 	
 //#ifdef Test_Control
-	gMotor_pulse[FL]=realPWM[FL] + FLZero;
-	gMotor_pulse[FR]=realPWM[FR] + FRZero;
-	gMotor_pulse[RL]=realPWM[RL] + RLZero;
-	gMotor_pulse[RR]=realPWM[RR] + RRZero;
+	gMotor_pulse[FL]=realPWM[FL] ;//+ FLZero;
+	gMotor_pulse[FR]=realPWM[FR] ;//+ FRZero;
+	gMotor_pulse[RL]=realPWM[RL] ;//+ RLZero;
+	gMotor_pulse[RR]=realPWM[RR] ;//+ RRZero;
 	gMotor_delta_pitch=2*pitch;
 	gMotor_delta_roll=2*roll;
 	gMotor_delta_yaw=2*yaw;

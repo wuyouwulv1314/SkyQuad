@@ -10,8 +10,11 @@
 #include "global.h"
 
 #define DRNumOfDataInPackage						7
-#define DRDataOffset										1000
-#define DRDataCenter										1500
+// 不同遥控器的这个值不太一样，导致有时候，虽然油门到底，但是螺旋桨还是会转。
+//#define DRDataOffset										1000
+#define DRDataOffset										1100
+//#define DRDataCenter										1500
+#define DRDataCenter										1520
 #define DRDataTolerance									50
 #define DRChannelMiddle(channel)				(((channel - DRDataCenter) < 50) && ((DRDataCenter - channel) < 50))
 #define DRChannelBottom(channel)				(((channel - DRDataOffset) < 50) && ((DRDataOffset - channel) < 100))

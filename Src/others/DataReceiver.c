@@ -65,31 +65,31 @@ void DRReceiver(uint8_t data)
 void AdaptControlHobby(void)
 {
 #ifdef Control_Default
-	uint16_t temp16[NumOfFlyChannel];
-	uint8_t	i;
-
-	//China Hand - Standard
-	if((DRDataPointerDone[CH6] > 1000) && (DRDataPointerDone[CH6] < 1333))
-	{
-		;
-	}
-	//Japan Hand
-	else if((DRDataPointerDone[CH6] > 1333) && (DRDataPointerDone[CH6] < 1667))
-	{
-		temp16[Yaw] = DRDataPointerDone[Yaw_JAP];//(1000 - (DRDataPointerDone[Yaw_JAP] - 1000)) + 1000
-		temp16[Pitch] = DRDataPointerDone[Pitch_JAP];
-		temp16[Throttle] = DRDataPointerDone[Throttle_JAP];
-		temp16[Roll] = DRDataPointerDone[Roll_JAP];
-		for(i = 0;i < NumOfFlyChannel;i ++)DRDataPointerDone[i] = temp16[i];
-	}
-	//America Hand
-	else if((DRDataPointerDone[CH6] > 1667) && (DRDataPointerDone[CH6] < 2000))
-	{
-		temp16[Yaw] = DRDataPointerDone[Yaw_USA];
-		temp16[Pitch] = DRDataPointerDone[Pitch_USA];
-		temp16[Throttle] = DRDataPointerDone[Throttle_USA];
-		temp16[Roll] = DRDataPointerDone[Roll_USA];
-		for(i = 0;i < NumOfFlyChannel;i ++)DRDataPointerDone[i] = temp16[i];
-	}
+//	uint16_t temp16[NumOfFlyChannel];
+//	uint8_t	i;
+//
+//	//China Hand - Standard
+//	if((DRDataPointerDone[CH6] > 1000) && (DRDataPointerDone[CH6] < 1333))
+//	{
+//		;
+//	}
+//	//Japan Hand
+//	else if((DRDataPointerDone[CH6] > 1333) && (DRDataPointerDone[CH6] < 1667))
+//	{
+//		temp16[Yaw] = DRDataPointerDone[Yaw_JAP];//(1000 - (DRDataPointerDone[Yaw_JAP] - 1000)) + 1000
+//		temp16[Pitch] = DRDataPointerDone[Pitch_JAP];
+//		temp16[Throttle] = DRDataPointerDone[Throttle_JAP];
+//		temp16[Roll] = DRDataPointerDone[Roll_JAP];
+//		for(i = 0;i < NumOfFlyChannel;i ++)DRDataPointerDone[i] = temp16[i];
+//	}
+//	//America Hand
+//	else if((DRDataPointerDone[CH6] > 1667) && (DRDataPointerDone[CH6] < 2000))
+//	{
+//		temp16[Yaw] = DRDataPointerDone[Yaw_USA];
+//		temp16[Pitch] = DRDataPointerDone[Pitch_USA];
+//		temp16[Throttle] = DRDataPointerDone[Throttle_USA];
+//		temp16[Roll] = DRDataPointerDone[Roll_USA];
+//		for(i = 0;i < NumOfFlyChannel;i ++)DRDataPointerDone[i] = temp16[i];
+//	}
 #endif
 }

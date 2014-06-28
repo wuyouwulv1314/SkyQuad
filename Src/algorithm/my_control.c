@@ -20,11 +20,14 @@
 #include "AHRS.h"
 #include "DataReceiver.h"
 
-#define MyKp  25
+//#define MyKp  25
+#define MyKp  15
 #define MyKi 0
-#define MyKd 20
+//#define MyKd 20
+#define MyKd 10
 
 #define RC_Scale 0.2
+//#define RC_Scale_Throttle 0.8
 #define RC_Scale_Throttle 1
 _Control_Loop_t my_loop={
 	{0,0,0},//desired,
@@ -62,11 +65,13 @@ void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
 		gpwmen = 0;
 #endif
 
+#define ReversePitchControl -1
+#define ReverseRollhControl -1
 	temp = DRDataPointerDone[Pitch];
-	rc_pitch = (DRChannelMiddle(temp))? 0:(temp-DRDataCenter);
+	rc_pitch = (DRChannelMiddle(temp))? 0:(temp-DRDataCenter)*ReversePitchControl;
 
 	temp = DRDataPointerDone[Roll];
-	rc_roll = (DRChannelMiddle(temp))? 0:(temp-DRDataCenter);
+	rc_roll = (DRChannelMiddle(temp))? 0:(temp-DRDataCenter)*ReverseRollhControl;
 
 	temp = DRDataPointerDone[Yaw];
 	rc_yaw = (DRChannelMiddleLock(temp))? 0:(temp-DRDataCenter);

@@ -25,14 +25,16 @@
 #define MPU6050InitDelayTresh	(MPU6050InitDelayms * (TIM2Freq / 1000))
 #define MPU6050InitDelay_Hang	(MPU6050InitDelayTresh + 2)
 
-enum{CHN_Hand,JAP_Hand,USA_Hand};
-//China Hand - Standard
-enum{Yaw,Pitch,Throttle,Roll,CH5,CH6,CH7};
-//Japan Hand
-enum{Roll_JAP,Pitch_JAP,Throttle_JAP,Yaw_JAP};
-//America Hand
-enum{Roll_USA,Throttle_USA,Pitch_USA,Yaw_USA};
-
+////America Hand
+enum{Roll,Pitch,Throttle,Yaw,CH5,CH6,CH7};
+//enum{CHN_Hand,JAP_Hand,USA_Hand};
+////China Hand - Standard
+//enum{Yaw,Pitch,Throttle,Roll,CH5,CH6,CH7};
+////Japan Hand
+//enum{Roll_JAP,Pitch_JAP,Throttle_JAP,Yaw_JAP};
+////America Hand
+//enum{Roll_USA,Throttle_USA,Pitch_USA,Yaw_USA};
+//
 enum{XH,XL,YH,YL,ZH,ZL};
 enum{ACCEL_XH,ACCEL_XL,ACCEL_YH,ACCEL_YL,ACCEL_ZH,ACCEL_ZL,GYRO_XH,GYRO_XL,GYRO_YH,GYRO_YL,GYRO_ZH,GYRO_ZL};
 
@@ -40,10 +42,11 @@ enum{RL,FL,RR,FR,NumOfOCChannel};
 #define NumOfFlyChannel	4
 
 //#define FLZero	300//377
-#define FLZero	200//377
-#define	RLZero	200//374
-#define	RRZero	200//400
-#define	FRZero	200//333
+#define MotorZero 0
+#define FLZero	MotorZero//377
+#define	RLZero	MotorZero//374
+#define	RRZero	MotorZero//400
+#define	FRZero	MotorZero//333
 
 extern __IO uint16_t gSendDataQueue[];
 extern uint16_t gTempGetData[];

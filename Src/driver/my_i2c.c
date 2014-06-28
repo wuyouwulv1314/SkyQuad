@@ -57,7 +57,7 @@ void I2C_Config(void)/*{{{*/
 void my_I2C_Init(void)/*{{{*/
 {
 	//IICTool Init
-	delay_ms(10);
+	delay_ms(100);
 	//while(1)
 	{
 		IIC_MasterRW(IIC_Stat_Write,MPU6050Addr,MPU6050InitStartAddr1,MPU6050InitQueueLength1,gMPU6050InitQueue1);
@@ -65,7 +65,7 @@ void my_I2C_Init(void)/*{{{*/
 	}
 	IIC_LetInitPass;
 
-	delay_ms(10);
+	delay_ms(100);
 
 	IIC_MasterRW(IIC_Stat_Write,MPU6050Addr,MPU6050InitStartAddr2,MPU6050InitQueueLength2,gMPU6050InitQueue2);
 	IIC_LetInitPass;
