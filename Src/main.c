@@ -179,6 +179,7 @@ void periph_init(void)/*{{{*/
 	RCC_ClocksTypeDef systemclocks;
 	LED_Config();
 	USART_Config();
+	BT_IO_Config();
 	BT_USART_Config();
 	I2C_Config();
 	TIM_Interrupt_Config();
@@ -208,7 +209,7 @@ void periph_init(void)/*{{{*/
 	gLEDCounterG = 0;
 	gLEDCounterB = 0;
 
-	delay_ms(500);
+	delay_ms(1500);
 	calib_sensor();
 	gsPrintfActualLength = sprintf((uint8_t*)gsPrintfBuffer,(uint8_t*)"Boot Success.\r\n"
 			"System Freq:%dHz\r\n""Bulid""	"__DATE__"	"__TIME__"\r\n"

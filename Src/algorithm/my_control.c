@@ -24,7 +24,7 @@
 #define MyKp  15
 #define MyKi 0
 //#define MyKd 20
-#define MyKd 10
+#define MyKd 6
 
 #define RC_Scale 0.2
 //#define RC_Scale_Throttle 0.8
