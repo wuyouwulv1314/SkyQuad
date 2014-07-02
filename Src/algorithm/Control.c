@@ -127,7 +127,7 @@ void Control_GetAngleLoopActual(void)
 	
 	//Roll
 	Control_AngleLoop.actual.roll = eulerPitchActual;
-	// BUG XXX è¿™ä¸¤ç§å†™æ³•å¥½åƒéƒ½å¯ä»¥ã€‚ã€‚
+	// BUG XXX ÕâÁ½ÖÖĞ´·¨ºÃÏñ¶¼¿ÉÒÔ¡£¡£
 	//Control_AngleLoop.actual.roll = eulerRollActual;
 	
 	//Pitch
@@ -219,7 +219,7 @@ void Control_Calc_PWM(_Control_Loop_t* loop)/*{{{*/
 	else if(Control_ThrottleDesired < - Control_ThrottleOutputMax)throttle = - Control_ThrottleOutputMax;
 	else throttle = Control_ThrottleDesired;
 	
-	// yaw å¼„åäº†
+	// yaw Åª·´ÁË
 //	yaw = -yaw;
 	temp= roll;
 	roll = -pitch;

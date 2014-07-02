@@ -61,7 +61,7 @@ void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
 	temp = DRDataPointerDone[Throttle];
 	rc_throttle = (DRChannelBottom(temp))? 0:(temp- DRDataOffset)*RC_Scale_Throttle;
 #ifdef Test_Tune_PID
-	if( rc_throttle == 0) // XXX æ²¡æœ‰æ²¹é—¨æ—¶ï¼Œè®¤ä¸ºä¸è®©ç”µæœºè¾“å‡º
+	if( rc_throttle == 0) // XXX Ã»ÓÐÓÍÃÅÊ±£¬ÈÏÎª²»ÈÃµç»úÊä³ö
 		gpwmen = 0;
 #endif
 
@@ -78,8 +78,8 @@ void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
 
 	loop->desired.pitch = - rc_pitch*loop->inputscale.pitch;
 	loop->desired.roll  = - rc_roll *loop->inputscale.roll;
-	//if(gpwmen && !(DRChannelMiddleLock(DRDataPointerDone[Yaw])))//æ²¡å¿…è¦ï¼Œæ²¡æœ‰åèˆªæŽ§åˆ¶æ—¶ rc_yaw=0;
-	if(gpwmen);//åŠ æ²¹é—¨èµ·æ¥åŽï¼Œç›´æŽ¥ç”¨å½“å‰è§’åº¦ä½œä¸º desired.yaw.è¿™æ ·æ‰èƒ½é”èˆª
+	//if(gpwmen && !(DRChannelMiddleLock(DRDataPointerDone[Yaw])))//Ã»±ØÒª£¬Ã»ÓÐÆ«º½¿ØÖÆÊ± rc_yaw=0;
+	if(gpwmen);//¼ÓÓÍÃÅÆðÀ´ºó£¬Ö±½ÓÓÃµ±Ç°½Ç¶È×÷Îª desired.yaw.ÕâÑù²ÅÄÜËøº½
 	//	loop->desired.yaw   = eulerYawActual - rc_yaw  *loop->inputscale.yaw;
 	else
 		loop->desired.yaw   = eulerYawActual;
@@ -160,7 +160,7 @@ void calc_motor_pwm(_Control_Loop_t * loop)/*{{{*/
 	else if(rc_throttle < - Control_ThrottleOutputMax)throttle = - Control_ThrottleOutputMax;
 	else throttle = rc_throttle;
 	
-	// yaw å¼„åäº†
+	// yaw Åª·´ÁË
 //	yaw = -yaw;
 //	temp= roll;
 //	roll = - roll;
