@@ -26,7 +26,8 @@
 //#define MyKd 20
 #define MyKd 6
 
-#define RC_Scale 0.2
+//#define RC_Scale 0.2
+#define RC_Scale 0.1
 //#define RC_Scale_Throttle 0.8
 #define RC_Scale_Throttle 1
 _Control_Loop_t my_loop={
@@ -38,7 +39,7 @@ _Control_Loop_t my_loop={
 	{MyKp,MyKp,MyKp},//kp,
 	{MyKi,MyKi,MyKi},//kp,
 	{MyKd,MyKd,MyKd},//kp,
-	{RC_Scale,RC_Scale,RC_Scale},//inputscale,
+	{RC_Scale,RC_Scale,RC_Scale*0.002},//inputscale,
 	//{1 * M_PI / 180,1 * M_PI / 180,1 * M_PI / 180},//inputscale,
 	{0,0,0}//output;}
 };
@@ -49,9 +50,17 @@ bool isTune=false;
 
 void get_attitude_actual(_Control_Loop_t * loop)/*{{{*/
 {
+	static float lastEulerYawActual=0.0f;
 	loop->actual.pitch=eulerPitchActual;
 	loop->actual.roll =eulerRollActual;
-	loop->actual.yaw  =eulerYawActual;
+#define Yaw180MaxThrehold 160
+	if((eulerYawActual < -Yaw180MaxThrehold) &&(lastEulerYawActual > Yaw180MaxThrehold))
+			eulerYawActual +=360;
+	else if((eulerYawActual > Yaw180MaxThrehold) &&(lastEulerYawActual < -Yaw180MaxThrehold))
+		eulerYawActual -=360;
+	loop->actual.yaw=eulerYawActual;
+	lastEulerYawActual = eulerYawActual;
+	//loop->actual.yaw  =eulerYawActual;
 }/*}}}*/
 int16_t rc_throttle,rc_pitch,rc_roll,rc_yaw;
 void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
@@ -67,6 +76,7 @@ void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
 
 #define ReversePitchControl -1
 #define ReverseRollhControl -1
+#define ReverseYawhControl -1
 	temp = DRDataPointerDone[Pitch];
 	rc_pitch = (DRChannelMiddle(temp))? 0:(temp-DRDataCenter)*ReversePitchControl;
 
@@ -74,12 +84,13 @@ void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
 	rc_roll = (DRChannelMiddle(temp))? 0:(temp-DRDataCenter)*ReverseRollhControl;
 
 	temp = DRDataPointerDone[Yaw];
-	rc_yaw = (DRChannelMiddleLock(temp))? 0:(temp-DRDataCenter);
+	rc_yaw = (DRChannelMiddleLock(temp))? 0:(temp-DRDataCenter)*ReverseYawhControl;
 
 	loop->desired.pitch = - rc_pitch*loop->inputscale.pitch;
 	loop->desired.roll  = - rc_roll *loop->inputscale.roll;
 	//if(gpwmen && !(DRChannelMiddleLock(DRDataPointerDone[Yaw])))//没必要，没有偏航控制时 rc_yaw=0;
-	if(gpwmen);//加油门起来后，直接用当前角度作为 desired.yaw.这样才能锁航
+	if(gpwmen)//加油门起来后，直接用当前角度作为 desired.yaw.这样才能锁航
+		loop->desired.yaw += rc_yaw * loop->inputscale.yaw;
 	//	loop->desired.yaw   = eulerYawActual - rc_yaw  *loop->inputscale.yaw;
 	else
 		loop->desired.yaw   = eulerYawActual;
