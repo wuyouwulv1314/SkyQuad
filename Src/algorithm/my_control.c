@@ -27,7 +27,7 @@
 #define MyKd 6
 
 //#define RC_Scale 0.2
-#define RC_Scale 0.1
+#define RC_Scale 0.075
 //#define RC_Scale_Throttle 0.8
 #define RC_Scale_Throttle 1
 _Control_Loop_t my_loop={
@@ -39,7 +39,7 @@ _Control_Loop_t my_loop={
 	{MyKp,MyKp,MyKp},//kp,
 	{MyKi,MyKi,MyKi},//kp,
 	{MyKd,MyKd,MyKd},//kp,
-	{RC_Scale,RC_Scale,RC_Scale*0.002},//inputscale,
+	{RC_Scale,RC_Scale,RC_Scale*0.006},//inputscale,
 	//{1 * M_PI / 180,1 * M_PI / 180,1 * M_PI / 180},//inputscale,
 	{0,0,0}//output;}
 };
@@ -50,16 +50,16 @@ bool isTune=false;
 
 void get_attitude_actual(_Control_Loop_t * loop)/*{{{*/
 {
-	static float lastEulerYawActual=0.0f;
+//	static float lastEulerYawActual=0.0f;
 	loop->actual.pitch=eulerPitchActual;
 	loop->actual.roll =eulerRollActual;
-#define Yaw180MaxThrehold 160
-	if((eulerYawActual < -Yaw180MaxThrehold) &&(lastEulerYawActual > Yaw180MaxThrehold))
-			eulerYawActual +=360;
-	else if((eulerYawActual > Yaw180MaxThrehold) &&(lastEulerYawActual < -Yaw180MaxThrehold))
-		eulerYawActual -=360;
+//#define Yaw180MaxThrehold 160
+//	if((eulerYawActual < -Yaw180MaxThrehold) &&(lastEulerYawActual > Yaw180MaxThrehold))
+//			eulerYawActual +=360;
+//	else if((eulerYawActual > Yaw180MaxThrehold) &&(lastEulerYawActual < -Yaw180MaxThrehold))
+//		eulerYawActual -=360;
 	loop->actual.yaw=eulerYawActual;
-	lastEulerYawActual = eulerYawActual;
+//	lastEulerYawActual = eulerYawActual;
 	//loop->actual.yaw  =eulerYawActual;
 }/*}}}*/
 int16_t rc_throttle,rc_pitch,rc_roll,rc_yaw;
@@ -90,7 +90,13 @@ void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
 	loop->desired.roll  = - rc_roll *loop->inputscale.roll;
 	//if(gpwmen && !(DRChannelMiddleLock(DRDataPointerDone[Yaw])))//没必要，没有偏航控制时 rc_yaw=0;
 	if(gpwmen)//加油门起来后，直接用当前角度作为 desired.yaw.这样才能锁航
+	{
 		loop->desired.yaw += rc_yaw * loop->inputscale.yaw;
+		if(loop->desired.yaw > 180)
+			loop->desired.yaw -=360;
+		else if(loop->desired.yaw < -180)
+			loop->desired.yaw +=360;
+	}
 	//	loop->desired.yaw   = eulerYawActual - rc_yaw  *loop->inputscale.yaw;
 	else
 		loop->desired.yaw   = eulerYawActual;
@@ -100,6 +106,10 @@ void calc_pid(_Control_Loop_t * loop)/*{{{*/
 	//Yaw
 	//difference
 	loop->difference.yaw = loop->desired.yaw - loop->actual.yaw;
+	if(loop->difference.yaw < -180)
+		loop->difference.yaw +=360;
+	else if(loop->difference.yaw > 180)
+		loop->difference.yaw -=360;
 	//I
 	if(loop->integration.yaw > Control_IntegrationMax)loop->integration.yaw = Control_IntegrationMax;
 	else if(loop->integration.yaw < - Control_IntegrationMax)loop->integration.yaw = - Control_IntegrationMax;
