@@ -37,8 +37,8 @@ _Control_Loop_t my_loop={
 	{0,0,0},//lastdifference,
 	{0,0,0},//integration,
 	{MyKp,MyKp,MyKp},//kp,
-	{MyKi,MyKi,MyKi},//kp,
-	{MyKd,MyKd,MyKd},//kp,
+	{MyKi,MyKi,MyKi},//ki,
+	{MyKd,MyKd,MyKd*0.2},//kd,
 	{RC_Scale,RC_Scale,RC_Scale*0.006},//inputscale,
 	//{1 * M_PI / 180,1 * M_PI / 180,1 * M_PI / 180},//inputscale,
 	{0,0,0}//output;}
@@ -88,7 +88,6 @@ void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
 
 	loop->desired.pitch = - rc_pitch*loop->inputscale.pitch;
 	loop->desired.roll  = - rc_roll *loop->inputscale.roll;
-	//if(gpwmen && !(DRChannelMiddleLock(DRDataPointerDone[Yaw])))//没必要，没有偏航控制时 rc_yaw=0;
 	if(gpwmen)//加油门起来后，直接用当前角度作为 desired.yaw.这样才能锁航
 	{
 		//如果rc_yaw不为0，应调整 desired yaw.注意rc_yaw是角速度，所以inputscale.yaw要保护时间dt在里面，所以yaw 方向的inputscale比其他两个方向的小很多。
@@ -99,7 +98,6 @@ void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
 		else if(loop->desired.yaw < -180)
 			loop->desired.yaw +=360;
 	}
-	//	loop->desired.yaw   = eulerYawActual - rc_yaw  *loop->inputscale.yaw;
 	else
 		loop->desired.yaw   = eulerYawActual;
 }/*}}}*/
