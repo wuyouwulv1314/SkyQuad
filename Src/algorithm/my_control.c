@@ -91,7 +91,9 @@ void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
 	//if(gpwmen && !(DRChannelMiddleLock(DRDataPointerDone[Yaw])))//没必要，没有偏航控制时 rc_yaw=0;
 	if(gpwmen)//加油门起来后，直接用当前角度作为 desired.yaw.这样才能锁航
 	{
+		//如果rc_yaw不为0，应调整 desired yaw.注意rc_yaw是角速度，所以inputscale.yaw要保护时间dt在里面，所以yaw 方向的inputscale比其他两个方向的小很多。
 		loop->desired.yaw += rc_yaw * loop->inputscale.yaw;
+		//期望的角度也应该限制在 -180 ~ +180 之间
 		if(loop->desired.yaw > 180)
 			loop->desired.yaw -=360;
 		else if(loop->desired.yaw < -180)

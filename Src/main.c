@@ -220,6 +220,7 @@ void periph_init(void)/*{{{*/
 }/*}}}*/
 void RC_Process(void)
 {
+	static int not_recv_instruct_cnt=0;
 #ifdef Test_Tune_PID
 	float tf;
 	static int tune_denoise_cnt=0;
@@ -319,6 +320,16 @@ void RC_Process(void)
 		//motor enable
 	{
 		gpwmen = 1;
+		if(false == flag_recv_instruct)
+		{
+			//flag_recv_instruct = true;
+			if(not_recv_instruct_cnt < 1000)
+				not_recv_instruct_cnt++;
+		}
+		else
+			not_recv_instruct_cnt = 0;
+		if(not_recv_instruct_cnt > 200)
+				gpwmen =0;
 		gLEDCounterR = LED_Hang;
 		LED_R_Set(LED_On);
 

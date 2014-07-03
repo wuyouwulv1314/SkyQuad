@@ -23,7 +23,7 @@ void DRReceiver(uint8_t data)
 	uint8_t step;
 	uint8_t i;
 	uint16_t* temp;
-	uint16_t tempdata;
+	uint16_t tempdata;//tempdata才16位，所以要求传进来的数据不超过65535.
 	
 	if(DRProcess < DRNumOfCheckChar)
 	{
@@ -46,6 +46,8 @@ void DRReceiver(uint8_t data)
 				for(i = 0;i < DRNumOfDataInPackage;i ++)
 					DRDataPointerProcess[i] = DRDataNull;
 				DRProcess = DRnull;
+				flag_recv_instruct=true;
+				g_check_recv_instruct_cnt=0;
 				DRUserProcedureAfterReceiveOnce;
 			}else
 			{

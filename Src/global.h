@@ -115,4 +115,6 @@ extern volatile uint8_t gpwmen;
 extern volatile uint8_t gbutton;
 extern volatile uint8_t gbuttonedge;
 
+extern bool flag_recv_instruct;
+extern int g_check_recv_instruct_cnt;
 #endif  /*__GLOBAL__H__*/
