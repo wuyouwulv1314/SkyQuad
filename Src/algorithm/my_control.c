@@ -24,9 +24,10 @@
 #define MyKp  15
 #define MyKi 0
 //#define MyKd 20
-#define MyKd 10
+#define MyKd 6
 
-#define RC_Scale 0.2
+//#define RC_Scale 0.2
+#define RC_Scale 0.075
 //#define RC_Scale_Throttle 0.8
 #define RC_Scale_Throttle 1
 _Control_Loop_t my_loop={
@@ -36,9 +37,9 @@ _Control_Loop_t my_loop={
 	{0,0,0},//lastdifference,
 	{0,0,0},//integration,
 	{MyKp,MyKp,MyKp},//kp,
-	{MyKi,MyKi,MyKi},//kp,
-	{MyKd,MyKd,MyKd},//kp,
-	{RC_Scale,RC_Scale,RC_Scale},//inputscale,
+	{MyKi,MyKi,MyKi},//ki,
+	{MyKd,MyKd,MyKd*0.2},//kd,
+	{RC_Scale,RC_Scale,RC_Scale*0.006},//inputscale,
 	//{1 * M_PI / 180,1 * M_PI / 180,1 * M_PI / 180},//inputscale,
 	{0,0,0}//output;}
 };
@@ -49,9 +50,17 @@ bool isTune=false;
 
 void get_attitude_actual(_Control_Loop_t * loop)/*{{{*/
 {
+//	static float lastEulerYawActual=0.0f;
 	loop->actual.pitch=eulerPitchActual;
 	loop->actual.roll =eulerRollActual;
-	loop->actual.yaw  =eulerYawActual;
+//#define Yaw180MaxThrehold 160
+//	if((eulerYawActual < -Yaw180MaxThrehold) &&(lastEulerYawActual > Yaw180MaxThrehold))
+//			eulerYawActual +=360;
+//	else if((eulerYawActual > Yaw180MaxThrehold) &&(lastEulerYawActual < -Yaw180MaxThrehold))
+//		eulerYawActual -=360;
+	loop->actual.yaw=eulerYawActual;
+//	lastEulerYawActual = eulerYawActual;
+	//loop->actual.yaw  =eulerYawActual;
 }/*}}}*/
 int16_t rc_throttle,rc_pitch,rc_roll,rc_yaw;
 void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
@@ -61,12 +70,13 @@ void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
 	temp = DRDataPointerDone[Throttle];
 	rc_throttle = (DRChannelBottom(temp))? 0:(temp- DRDataOffset)*RC_Scale_Throttle;
 #ifdef Test_Tune_PID
-	if( rc_throttle == 0) // XXX æ²¡æœ‰æ²¹é—¨æ—¶ï¼Œè®¤ä¸ºä¸è®©ç”µæœºè¾“å‡º
+	if( rc_throttle == 0) // XXX Ã»ÓÐÓÍÃÅÊ±£¬ÈÏÎª²»ÈÃµç»úÊä³ö
 		gpwmen = 0;
 #endif
 
 #define ReversePitchControl -1
 #define ReverseRollhControl -1
+#define ReverseYawhControl -1
 	temp = DRDataPointerDone[Pitch];
 	rc_pitch = (DRChannelMiddle(temp))? 0:(temp-DRDataCenter)*ReversePitchControl;
 
@@ -74,13 +84,20 @@ void get_remote_control_desired(_Control_Loop_t * loop)/*{{{*/
 	rc_roll = (DRChannelMiddle(temp))? 0:(temp-DRDataCenter)*ReverseRollhControl;
 
 	temp = DRDataPointerDone[Yaw];
-	rc_yaw = (DRChannelMiddleLock(temp))? 0:(temp-DRDataCenter);
+	rc_yaw = (DRChannelMiddleLock(temp))? 0:(temp-DRDataCenter)*ReverseYawhControl;
 
 	loop->desired.pitch = - rc_pitch*loop->inputscale.pitch;
 	loop->desired.roll  = - rc_roll *loop->inputscale.roll;
-	//if(gpwmen && !(DRChannelMiddleLock(DRDataPointerDone[Yaw])))//æ²¡å¿…è¦ï¼Œæ²¡æœ‰åèˆªæŽ§åˆ¶æ—¶ rc_yaw=0;
-	if(gpwmen);//åŠ æ²¹é—¨èµ·æ¥åŽï¼Œç›´æŽ¥ç”¨å½“å‰è§’åº¦ä½œä¸º desired.yaw.è¿™æ ·æ‰èƒ½é”èˆª
-	//	loop->desired.yaw   = eulerYawActual - rc_yaw  *loop->inputscale.yaw;
+	if(gpwmen)//¼ÓÓÍÃÅÆðÀ´ºó£¬Ö±½ÓÓÃµ±Ç°½Ç¶È×÷Îª desired.yaw.ÕâÑù²ÅÄÜËøº½
+	{
+		//Èç¹ûrc_yaw²»Îª0£¬Ó¦µ÷Õû desired yaw.×¢Òârc_yawÊÇ½ÇËÙ¶È£¬ËùÒÔinputscale.yawÒª±£»¤Ê±¼ädtÔÚÀïÃæ£¬ËùÒÔyaw ·½ÏòµÄinputscale±ÈÆäËûÁ½¸ö·½ÏòµÄÐ¡ºÜ¶à¡£
+		loop->desired.yaw += rc_yaw * loop->inputscale.yaw;
+		//ÆÚÍûµÄ½Ç¶ÈÒ²Ó¦¸ÃÏÞÖÆÔÚ -180 ~ +180 Ö®¼ä
+		if(loop->desired.yaw > 180)
+			loop->desired.yaw -=360;
+		else if(loop->desired.yaw < -180)
+			loop->desired.yaw +=360;
+	}
 	else
 		loop->desired.yaw   = eulerYawActual;
 }/*}}}*/
@@ -89,6 +106,10 @@ void calc_pid(_Control_Loop_t * loop)/*{{{*/
 	//Yaw
 	//difference
 	loop->difference.yaw = loop->desired.yaw - loop->actual.yaw;
+	if(loop->difference.yaw < -180)
+		loop->difference.yaw +=360;
+	else if(loop->difference.yaw > 180)
+		loop->difference.yaw -=360;
 	//I
 	if(loop->integration.yaw > Control_IntegrationMax)loop->integration.yaw = Control_IntegrationMax;
 	else if(loop->integration.yaw < - Control_IntegrationMax)loop->integration.yaw = - Control_IntegrationMax;
@@ -160,7 +181,7 @@ void calc_motor_pwm(_Control_Loop_t * loop)/*{{{*/
 	else if(rc_throttle < - Control_ThrottleOutputMax)throttle = - Control_ThrottleOutputMax;
 	else throttle = rc_throttle;
 	
-	// yaw å¼„åäº†
+	// yaw Åª·´ÁË
 //	yaw = -yaw;
 //	temp= roll;
 //	roll = - roll;

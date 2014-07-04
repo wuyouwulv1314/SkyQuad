@@ -21,6 +21,8 @@
 #include "IICtools.h"
 #include "my_sensor.h"
 
+#define CheckRecvInstrctCntThreshold TIM2Freq/2
+
 void TIM_Interrupt_Config(void)/*{{{*/
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
@@ -158,6 +160,12 @@ void TIM2_IRQHandler(void)/*{{{*/
 		LED_B_Set(LED_On)
 	}
 #endif
+	g_check_recv_instruct_cnt ++;
+	if(g_check_recv_instruct_cnt == CheckRecvInstrctCntThreshold)
+	{
+		g_check_recv_instruct_cnt = 0;
+		flag_recv_instruct = false;
+	}
 	//delay ms service
 	gDelayCounter ++;
 	if(gDelayCounter == Delay1msTresh)

@@ -138,7 +138,7 @@ void Running_Print(void)
 	gUARTpointer = gsPrintfBuffer;
 #endif
 #ifndef Test_Tune_PID
-#if 0
+#if 1
 	gsPrintfActualLength = sprintf(gsPrintfBuffer,"control  "FSF FSF FSF FSF FSF FSF ISF ISF ISF "\r\n",
 			eulerPitchActual,eulerRollActual,eulerYawActual,
 			my_loop.desired.pitch,my_loop.desired.roll,my_loop.desired.yaw,
@@ -146,7 +146,7 @@ void Running_Print(void)
 	gUARTpointer = gsPrintfBuffer;
 #endif
 #endif
-#if 1
+#if 0
 	gsPrintfActualLength = sprintf(gsPrintfBuffer,"control  "FSF FSF FSF ISF ISF ISF ISF ISF ISF ISF "\r\n",
 			eulerPitchActual,eulerRollActual,eulerYawActual,
 			gMotor_pulse[FL],gMotor_pulse[FR],gMotor_pulse[RL],gMotor_pulse[RR],

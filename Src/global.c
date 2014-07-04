@@ -45,3 +45,6 @@ volatile uint8_t gpwmen = 0;
 volatile uint8_t gbutton = 0;
 volatile uint8_t gbuttonedge = NoneEdge;
 
+bool flag_recv_instruct=false;
+int g_check_recv_instruct_cnt = 0;
+
