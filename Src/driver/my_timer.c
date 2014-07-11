@@ -18,7 +18,7 @@
 
 #include "my_timer.h"
 #include "global.h"
-#include "IICtools.h"
+#include "my_i2c.h"
 #include "my_sensor.h"
 
 #define CheckRecvInstrctCntThreshold TIM2Freq/2

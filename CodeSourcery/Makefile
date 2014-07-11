@@ -90,6 +90,8 @@ SRC_DIR = ../Src
 # SRC files
 SRC += $(SRC_DIR)/../Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/system_stm32f10x.c
 SRC += $(wildcard $(SRC_DIR)/../Libraries/STM32F10x_StdPeriph_Driver/src/*.c)
+SRC += $(wildcard $(SRC_DIR)/../Libraries/STM32_CPAL_Driver/src/*.c)
+SRC += $(wildcard $(SRC_DIR)/../Libraries/STM32_CPAL_Driver/devices/stm32f10x/*.c)
 SRC += $(wildcard $(SRC_DIR)/*.c)
 SRC += $(wildcard $(SRC_DIR)/algorithm/*.c)
 SRC += $(wildcard $(SRC_DIR)/driver/*.c)
@@ -154,6 +156,8 @@ EXTRAINCDIRS += $(SRC_DIR)/algorithm/
 EXTRAINCDIRS += $(SRC_DIR)/driver/
 EXTRAINCDIRS += $(SRC_DIR)/others/
 EXTRAINCDIRS += $(SRC_DIR)/../Libraries/STM32F10x_StdPeriph_Driver/inc 
+EXTRAINCDIRS += $(SRC_DIR)/../Libraries/STM32_CPAL_Driver/inc 
+EXTRAINCDIRS += $(SRC_DIR)/../Libraries/STM32_CPAL_Driver/devices/stm32f10x 
 EXTRAINCDIRS += $(SRC_DIR)/../Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x
 EXTRAINCDIRS += $(SRC_DIR)/../Libraries/CMSIS/CM3/CoreSupport
 # List any extra directories to look for library files here.
