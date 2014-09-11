@@ -16,54 +16,43 @@
  * =====================================================================================
  */
 
-#include "global.h"
 #include "my_i2c.h"
+#include "IICtools.h"
 #include "my_sensor.h"
 #include "my_misc.h"
-#include "UARTtools.h"
-
-static CPAL_TransferTypeDef CPAL_Transfer;
-
-void IIC_WaitForRWDone(void)
+void I2C_IO_Config(void)/*{{{*/
 {
-	while ((MPU6050_I2C_DEV.CPAL_State != CPAL_STATE_READY) && (MPU6050_I2C_DEV.CPAL_State != CPAL_STATE_ERROR) )
-    { }
-}
+	GPIO_InitTypeDef GPIO_InitStructure;
 
-void IIC_MasterRW(IIC_StatType stat,uint8_t slave_addr,uint8_t reg_addr,uint16_t length,uint8_t* data)
-{
-	IIC_WaitForRWDone();
-	CPAL_Transfer.wNumData = length;
-	CPAL_Transfer.pbBuffer = data;
-	CPAL_Transfer.wAddr1 = (uint32_t)slave_addr;
-	CPAL_Transfer.wAddr2 = (uint32_t)reg_addr;
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
-	MPU6050_I2C_DEV.wCPAL_Options = 0;
-
-	if(stat == IIC_Stat_Write){
-		MPU6050_I2C_DEV.pCPAL_TransferTx = &CPAL_Transfer;
-		if(CPAL_I2C_Write(&MPU6050_I2C_DEV) == CPAL_PASS){
-			// IIC_WaitForRWDone();
-		}
-	}
-	else if(stat == IIC_Stat_Read){
-		MPU6050_I2C_DEV.pCPAL_TransferRx = &CPAL_Transfer;
-		if(CPAL_I2C_Read(&MPU6050_I2C_DEV) == CPAL_PASS){
-			// IIC_WaitForRWDone();
-		}
-	}
-
-}
-
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_10 | GPIO_Pin_11;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+}/*}}}*/
 void I2C_Config(void)/*{{{*/
 {
-	CPAL_I2C_StructInit(&MPU6050_I2C_DEV);
+	I2C_InitTypeDef  I2C_InitStructure; 
+	I2C_StructInit(&I2C_InitStructure);
+	I2C_IO_Config();
+	RCC_APB1PeriphClockCmd(I2C_Sensor_Clk, ENABLE);
 
-	// MPU6050_I2C_DEV.CPAL_Dev is initialized when defined
-	MPU6050_I2C_DEV.pCPAL_I2C_Struct->I2C_ClockSpeed = 350000;
-	MPU6050_I2C_DEV.pCPAL_I2C_Struct->I2C_OwnAddress1 = 0xAA;
+	/* I2C configuration */
+	I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
+	I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+	I2C_InitStructure.I2C_OwnAddress1 = 0xAA;
+	I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
+	I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
+	I2C_InitStructure.I2C_ClockSpeed = 350000;
+	//I2C_InitStructure.I2C_ClockSpeed = 100000;
 
-	CPAL_I2C_Init(&MPU6050_I2C_DEV);
+	/* I2C Peripheral Enable */
+	I2C_Cmd(I2C_Sensor, ENABLE);
+	/* Apply I2C configuration after enabling it */
+	I2C_Init(I2C_Sensor, &I2C_InitStructure);
+
+	I2C_ITConfig(I2C_Sensor,I2C_IT_EVT,ENABLE);
 }/*}}}*/
 void my_I2C_Init(void)/*{{{*/
 {
@@ -74,22 +63,43 @@ void my_I2C_Init(void)/*{{{*/
 		IIC_MasterRW(IIC_Stat_Write,MPU6050Addr,MPU6050InitStartAddr1,MPU6050InitQueueLength1,gMPU6050InitQueue1);
 	//	Delay(0xfff);
 	}
-	IIC_WaitForRWDone();
+	IIC_LetInitPass;
 
 	delay_ms(100);
 
 	IIC_MasterRW(IIC_Stat_Write,MPU6050Addr,MPU6050InitStartAddr2,MPU6050InitQueueLength2,gMPU6050InitQueue2);
-	IIC_WaitForRWDone();
+	IIC_LetInitPass;
 
 }/*}}}*/
-void CPAL_I2C_ERR_UserCallback(CPAL_DevTypeDef pDevInstance, uint32_t DeviceError)/*{{{*/
+//void I2C_Sensor_EV_IRQHandler(void)
+void I2C2_EV_IRQHandler(void)
 {
-	//user defined error routine
-	gsPrintfActualLength = sprintf((uint8_t*)gsPrintfBuffer,"IIC ERROR.Code=%d\r\n",DeviceError);
-	UARTsendString(Tool_USART1,(uint8_t*)gsPrintfBuffer);
-	while(1);
-}/*}}}*/
-void CPAL_I2C_RXTC_UserCallback(CPAL_InitTypeDef* pDevInitStruct)/*{{{*/
-{
-	MPU6050_RawProcess();
-}/*}}}*/
+	if(I2C_GetFlagStatus(I2C_Sensor,I2C_FLAG_SB) == SET)
+		//start sent
+	{
+		//clear flag
+		I2C_ReadRegister(I2C_Sensor,I2C_Register_SR1);
+		IIC_StartEvent();
+	}else
+	if(I2C_GetFlagStatus(I2C_Sensor,I2C_FLAG_ADDR) == SET)
+		//address sent
+	{
+		//clear flag
+		I2C_ReadRegister(I2C_Sensor,I2C_Register_SR1);
+		I2C_ReadRegister(I2C_Sensor,I2C_Register_SR2);
+		IIC_AddressEvent();
+	}else
+	if(I2C_GetFlagStatus(I2C_Sensor,I2C_FLAG_BTF) == SET)
+		//data transferred
+	{
+		//clear flag
+		I2C_ReadRegister(I2C_Sensor,I2C_Register_SR1);
+		IIC_DataEvent();
+	}else
+	{
+		//clear flag
+		I2C_ReadRegister(I2C_Sensor,I2C_Register_SR1);
+		I2C_ReadRegister(I2C_Sensor,I2C_Register_SR2);
+		I2C_ReadRegister(I2C_Sensor,I2C_Register_DR);
+	}
+}
