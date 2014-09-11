@@ -1,9 +1,3 @@
-.tags*
+*.tags
 *.swp
-*.o
-*.lst
-*.d
-*.bin
-*.elf
-*.map
 Src/tags
